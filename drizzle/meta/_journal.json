@@ -8,6 +8,13 @@
       "when": 1748028110395,
       "tag": "0000_exotic_inertia",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1748042776208,
+      "tag": "0001_secret_hulk",
+      "breakpoints": true
     }
   ]
 }
