@@ -26,10 +26,12 @@ export function NavbarUserMenu() {
       ) : session ? (
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium">{session.user?.name}</p>
-              <p className="text-xs text-muted-foreground">{session.user?.email}</p>
-            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/settings" className="cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            </Button>
           </div>
           
           <DropdownMenu>
