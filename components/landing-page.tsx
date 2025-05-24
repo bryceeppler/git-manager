@@ -17,7 +17,7 @@ export function LandingPage() {
     {
       icon: Trash2,
       title: "Just Delete Things",
-      description: "Click delete, it gets deleted. No &quot;Are you sure?&quot; popups unless you want them.",
+      description: "Click delete, it gets deleted. No 'Are you sure?' popups unless you want them.",
       highlight: "Zero Friction"
     },
     {
