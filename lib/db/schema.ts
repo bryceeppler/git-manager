@@ -16,7 +16,6 @@ export const userSettings = pgTable('user_settings', {
   id: serial('id').primaryKey(),
   userId: serial('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
   requireRepoDeleteConfirmation: boolean('require_repo_delete_confirmation').default(true).notNull(),
-  disableBulkOperations: boolean('disable_bulk_operations').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({

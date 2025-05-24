@@ -8,10 +8,9 @@ import { revalidatePath } from 'next/cache';
 export async function createUser(userData: NewUser) {
   const [user] = await db.insert(users).values(userData).returning();
   
+  // Create user settings with schema defaults (requireRepoDeleteConfirmation: true)
   await db.insert(userSettings).values({
     userId: user.id,
-    requireRepoDeleteConfirmation: true,
-    disableBulkOperations: false,
   });
   
   return user;

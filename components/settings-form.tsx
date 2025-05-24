@@ -28,7 +28,6 @@ import type { UserSettings } from "@/lib/db/schema";
 
 const settingsSchema = z.object({
   requireRepoDeleteConfirmation: z.boolean(),
-  disableBulkOperations: z.boolean(),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -46,7 +45,6 @@ export function SettingsForm({ userId, initialSettings }: SettingsFormProps) {
     defaultValues: {
       requireRepoDeleteConfirmation:
         initialSettings?.requireRepoDeleteConfirmation ?? true,
-      disableBulkOperations: initialSettings?.disableBulkOperations ?? false,
     },
   });
 
@@ -71,7 +69,7 @@ export function SettingsForm({ userId, initialSettings }: SettingsFormProps) {
           <CardHeader>
             <CardTitle className="text-xl">Safety & Preferences</CardTitle>
             <CardDescription className="text-base">
-              Configure how Git Manager behaves when performing operations on
+              Configure how GitRekt behaves when performing operations on
               your repositories.
             </CardDescription>
           </CardHeader>
@@ -97,31 +95,6 @@ export function SettingsForm({ userId, initialSettings }: SettingsFormProps) {
                       When enabled, you&apos;ll need to type the repository name
                       to confirm deletion. This helps prevent accidental
                       deletions and provides an extra layer of safety.
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="disableBulkOperations"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border p-4 bg-background/50">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-base font-medium">
-                      Disable bulk operations
-                    </FormLabel>
-                    <FormDescription className="text-sm">
-                      When enabled, bulk operations (like deleting multiple
-                      repositories at once) will be disabled for extra safety.
-                      You&apos;ll need to delete repositories one at a time.
                     </FormDescription>
                   </div>
                 </FormItem>

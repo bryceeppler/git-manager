@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RefreshCw, Search, ArrowUpDown, Calendar, Clock, Star, GitFork, Activity } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,7 +26,6 @@ interface RepositoryControlsProps {
   sortDirection: SortDirection;
   setSortDirection: (direction: SortDirection) => void;
   sortedAndFilteredRepositories: GitHubRepositoryWithHealth[];
-  onSelectAll: (checked: boolean) => void;
   onBulkDelete: (deletedIds: number[]) => void;
   isAnalyzingHealth: boolean;
   setIsAnalyzingHealth: (isAnalyzing: boolean) => void;
@@ -45,7 +43,6 @@ export function RepositoryControls({
   sortDirection,
   setSortDirection,
   sortedAndFilteredRepositories,
-  onSelectAll,
   onBulkDelete,
   isAnalyzingHealth,
   setIsAnalyzingHealth,
@@ -187,162 +184,143 @@ export function RepositoryControls({
 
   return (
     <Card>
-      <CardContent className="space-y-4 sm:space-y-6">
-        {/* Search and Sort Controls */}
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-          {/* Search */}
-          <div className="relative w-full lg:flex-1 lg:max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search repositories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+      <CardContent className="space-y-3">
+        {/* Repository Stats */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-4 border-b">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm text-muted-foreground">
+            <div>
+              Showing <span className="font-semibold text-foreground">{sortedAndFilteredRepositories.length}</span> of{" "}
+              <span className="font-semibold text-foreground">{repositories.length}</span> repositories
+            </div>
+            
+            {searchTerm && (
+              <div className="md:border-l md:pl-2">
+                filtered by: <span className="font-medium text-foreground">&ldquo;{searchTerm}&rdquo;</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
+          {/* Search Section */}
+          <div className="lg:col-span-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search repositories..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
 
           {/* Sort Controls */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="updated">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Last Updated
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="created">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Created Date
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="name">
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown className="h-4 w-4" />
-                      Name
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="stars">
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4" />
-                      Stars
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="forks">
-                    <div className="flex items-center gap-2">
-                      <GitFork className="h-4 w-4" />
-                      Forks
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="health">
-                    <div className="flex items-center gap-2">
-                      <Activity className="h-4 w-4" />
-                      Health Score
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="lg:col-span-2">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="flex flex-col md:flex-row gap-3 flex-1">
+                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                  <SelectTrigger className="min-w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="updated">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        Last Updated
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="created">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Created Date
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="name">
+                      <div className="flex items-center gap-2">
+                        <ArrowUpDown className="h-4 w-4" />
+                        Name
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="stars">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4" />
+                        Stars
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="forks">
+                      <div className="flex items-center gap-2">
+                        <GitFork className="h-4 w-4" />
+                        Forks
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="health">
+                      <div className="flex items-center gap-2">
+                        <Activity className="h-4 w-4" />
+                        Health Score
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
-              <Button
-                onClick={toggleSortDirection}
-                variant="secondary"
-              >
-                <ArrowUpDown className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="truncate">{getSortDirectionLabel(sortBy, sortDirection)}</span>
-              </Button>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={fetchRepositories}
-                disabled={isLoading}
-                className="flex-1 sm:flex-none"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 flex-shrink-0 ${isLoading ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">Refresh</span>
-                <span className="sm:hidden">Refresh</span>
-              </Button>
-
-              <Button
-                onClick={analyzeHealthForAll}
-                disabled={isAnalyzingHealth || repositories.length === 0}
-                className="flex-1 sm:flex-none"
-              >
-                <Activity className={`h-4 w-4 mr-2 flex-shrink-0 ${isAnalyzingHealth ? "animate-pulse" : ""}`} />
-                <span className="hidden md:inline">
-                  {isAnalyzingHealth 
-                    ? `Analyzing... (${analysisProgress.current}/${analysisProgress.total})` 
-                    : "Analyze Health"
-                  }
-                </span>
-                <span className="md:hidden">
-                  {isAnalyzingHealth 
-                    ? `${analysisProgress.current}/${analysisProgress.total}` 
-                    : "Health"
-                  }
-                </span>
-              </Button>
+                <Button
+                  onClick={toggleSortDirection}
+                  variant="outline"
+                  className="min-w-[140px] justify-start"
+                >
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  <span className="truncate">{getSortDirectionLabel(sortBy, sortDirection)}</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bulk Actions */}
-        {sortedAndFilteredRepositories.length > 0 && (
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
-            <div className="flex flex-col xs:flex-row items-start xs:items-center gap-3 xs:gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="select-all"
-                  checked={selectedRepositories.size > 0 && selectedRepositories.size === sortedAndFilteredRepositories.length}
-                  onCheckedChange={onSelectAll}
-                />
-                <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
-                  Select All ({sortedAndFilteredRepositories.length})
-                </label>
-              </div>
+        {/* Action Buttons */}
+        <div className="flex flex-col md:flex-row gap-3 pt-2">
+          <div className="flex flex-col md:flex-row gap-3 flex-1">
+            <Button
+              onClick={fetchRepositories}
+              disabled={isLoading}
+              variant="outline"
+              className="md:w-auto"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh Repositories
+            </Button>
+
+            <Button
+              onClick={analyzeHealthForAll}
+              disabled={isAnalyzingHealth || repositories.length === 0}
+              variant="outline"
+              className="md:w-auto"
+            >
+              <Activity className={`h-4 w-4 mr-2 ${isAnalyzingHealth ? "animate-pulse" : ""}`} />
+              {isAnalyzingHealth 
+                ? `Analyzing... (${analysisProgress.current}/${analysisProgress.total})` 
+                : "Analyze Health"
+              }
+            </Button>
+          </div>
+
+          {/* Bulk Actions */}
+          {selectedRepositories.size > 0 && (
+            <div className="flex flex-col md:flex-row gap-3 md:ml-auto">
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedRepositories(new Set())}
+                className="md:w-auto"
+              >
+                Clear Selection ({selectedRepositories.size})
+              </Button>
               
-              {selectedRepositories.size > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  {selectedRepositories.size} selected
-                </div>
-              )}
-            </div>
-
-            {selectedRepositories.size > 0 && (
-              <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 w-full xs:w-auto">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedRepositories(new Set())}
-                  className="w-full xs:w-auto"
-                >
-                  Clear Selection
-                </Button>
-                
-                <BulkDeleteDialog
-                  selectedRepositories={selectedRepositories}
-                  repositories={repositories}
-                  onBulkDelete={onBulkDelete}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-sm text-muted-foreground">
-          <div>
-            Showing <span className="font-medium text-foreground">{sortedAndFilteredRepositories.length}</span> of{" "}
-            <span className="font-medium text-foreground">{repositories.length}</span> repositories
-          </div>
-          
-          {searchTerm && (
-            <div className="sm:text-right">
-              Filtered by: <span className="font-medium text-foreground break-words">&ldquo;{searchTerm}&rdquo;</span>
+              <BulkDeleteDialog
+                selectedRepositories={selectedRepositories}
+                repositories={repositories}
+                onBulkDelete={onBulkDelete}
+                onSelectionChange={setSelectedRepositories}
+              />
             </div>
           )}
         </div>

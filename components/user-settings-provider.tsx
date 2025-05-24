@@ -6,7 +6,6 @@ import type { UserSettings } from "@/lib/db/schema";
 interface UserSettingsContextValue {
   settings: UserSettings | null;
   requireRepoDeleteConfirmation: boolean;
-  disableBulkOperations: boolean;
 }
 
 const UserSettingsContext = createContext<UserSettingsContextValue | null>(null);
@@ -20,7 +19,6 @@ export function UserSettingsProvider({ children, initialSettings }: UserSettings
   const value: UserSettingsContextValue = {
     settings: initialSettings,
     requireRepoDeleteConfirmation: initialSettings?.requireRepoDeleteConfirmation ?? true,
-    disableBulkOperations: initialSettings?.disableBulkOperations ?? false,
   };
 
   return (
@@ -37,7 +35,6 @@ export function useUserSettingsContext() {
     return {
       settings: null,
       requireRepoDeleteConfirmation: true,
-      disableBulkOperations: false,
     };
   }
   return context;

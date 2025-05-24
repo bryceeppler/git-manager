@@ -19,6 +19,5 @@ export function useUserSettings(options: UseUserSettingsOptions = {}) {
     settings: validSettings,
     loading: false,
     requireRepoDeleteConfirmation: validSettings?.requireRepoDeleteConfirmation ?? true,
-    disableBulkOperations: validSettings?.disableBulkOperations ?? false,
   };
 } 

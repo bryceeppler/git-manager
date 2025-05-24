@@ -5,7 +5,8 @@ import { GitHubRepository } from "@/lib/github-api";
 import { deleteRepository } from "@/lib/actions/repository-actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useUserSettingsContext } from "./user-settings-provider";
 
@@ -13,23 +14,56 @@ interface BulkDeleteDialogProps {
   selectedRepositories: Set<number>;
   repositories: GitHubRepository[];
   onBulkDelete: (deletedIds: number[]) => void;
+  onSelectionChange: (selectedIds: Set<number>) => void;
 }
 
-export function BulkDeleteDialog({ selectedRepositories, repositories, onBulkDelete }: BulkDeleteDialogProps) {
+export function BulkDeleteDialog({ selectedRepositories, repositories, onBulkDelete, onSelectionChange }: BulkDeleteDialogProps) {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-  const { disableBulkOperations } = useUserSettingsContext();
+  const [isOpen, setIsOpen] = useState(false);
+  const [repositoriesToDelete, setRepositoriesToDelete] = useState<Set<number>>(new Set());
+  const [confirmationInputs, setConfirmationInputs] = useState<Record<number, string>>({});
+  const { requireRepoDeleteConfirmation } = useUserSettingsContext();
+
+  // Initialize repositories to delete when dialog opens
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      setRepositoriesToDelete(new Set(selectedRepositories));
+      setConfirmationInputs({});
+    } else {
+      setRepositoriesToDelete(new Set());
+      setConfirmationInputs({});
+    }
+  };
+
+  const removeRepository = (repoId: number) => {
+    const newRepos = new Set(repositoriesToDelete);
+    newRepos.delete(repoId);
+    setRepositoriesToDelete(newRepos);
+    
+    const newInputs = { ...confirmationInputs };
+    delete newInputs[repoId];
+    setConfirmationInputs(newInputs);
+
+    // Also remove from parent's selected repositories
+    const updatedSelection = new Set(selectedRepositories);
+    updatedSelection.delete(repoId);
+    onSelectionChange(updatedSelection);
+  };
+
+  const updateConfirmationInput = (repoId: number, value: string) => {
+    setConfirmationInputs(prev => ({
+      ...prev,
+      [repoId]: value
+    }));
+  };
 
   const handleBulkDelete = async () => {
-    if (disableBulkOperations) {
-      toast.error("Bulk operations are disabled in your settings");
-      return;
-    }
-
     setIsBulkDeleting(true);
-    const selectedRepos = repositories.filter(repo => selectedRepositories.has(repo.id));
+    const reposToDelete = repositories.filter(repo => repositoriesToDelete.has(repo.id));
     
     try {
-      const deletePromises = selectedRepos.map(repo =>
+      const deletePromises = reposToDelete.map(repo =>
         deleteRepository(repo.owner.login, repo.name)
       );
 
@@ -42,18 +76,19 @@ export function BulkDeleteDialog({ selectedRepositories, repositories, onBulkDel
       results.forEach((result, index) => {
         if (result.status === "fulfilled" && result.value.success) {
           successCount++;
-          deletedIds.push(selectedRepos[index].id);
+          deletedIds.push(reposToDelete[index].id);
         } else {
           errorCount++;
-          console.error(`Failed to delete ${selectedRepos[index].name}`);
+          console.error(`Failed to delete ${reposToDelete[index].name}`);
         }
       });
 
       if (successCount > 0) {
         onBulkDelete(deletedIds);
+        setIsOpen(false);
         
         if (errorCount === 0) {
-          toast.success(`Successfully deleted ${successCount} repositories`);
+          toast.success(`Successfully deleted ${successCount} ${successCount === 1 ? 'repository' : 'repositories'}`);
         } else {
           toast.success(`Deleted ${successCount} repositories. ${errorCount} failed.`);
         }
@@ -70,47 +105,115 @@ export function BulkDeleteDialog({ selectedRepositories, repositories, onBulkDel
     }
   };
 
-  const selectedRepos = repositories.filter(repo => selectedRepositories.has(repo.id));
-  const isDisabled = selectedRepositories.size === 0 || disableBulkOperations;
+  const reposToDelete = repositories.filter(repo => repositoriesToDelete.has(repo.id));
+  const isDisabled = selectedRepositories.size === 0;
+
+  // Check if all required confirmations are entered
+  const allConfirmationsValid = requireRepoDeleteConfirmation 
+    ? reposToDelete.every(repo => confirmationInputs[repo.id] === repo.name)
+    : true;
+
+  const canDelete = repositoriesToDelete.size > 0 && allConfirmationsValid && !isBulkDeleting;
+
+  const dialogTitle = selectedRepositories.size === 1 
+    ? "Delete Repository" 
+    : `Delete ${selectedRepositories.size} Repositories`;
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
         <Button 
           variant="destructive" 
           size="sm"
           disabled={isDisabled}
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2 w-full md:w-auto"
         >
-          <Trash2 className="h-4 w-4" />
-          Delete Selected ({selectedRepositories.size})
+          <Trash2 className="h-4 w-4 flex-shrink-0" />
+          <span className="truncate">
+            Delete Selected ({selectedRepositories.size})
+          </span>
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Selected Repositories</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <span className="block">
-              Are you sure you want to delete these {selectedRepositories.size} repositories? 
-              This action cannot be undone.
-            </span>
-            <div className="max-h-32 overflow-y-auto bg-muted/50 rounded p-2 text-sm">
-              {selectedRepos.map(repo => (
-                <div key={repo.id} className="text-destructive font-mono">
-                  {repo.full_name}
-                </div>
-              ))}
-            </div>
+          <AlertDialogTitle>{dialogTitle}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {repositoriesToDelete.size === 0 ? (
+              <span className="text-muted-foreground">
+                No repositories selected for deletion.
+              </span>
+            ) : (
+              <span>
+                {repositoriesToDelete.size === 1 
+                  ? "This action will permanently delete the repository. This cannot be undone."
+                  : `This action will permanently delete ${repositoriesToDelete.size} repositories. This cannot be undone.`
+                }
+              </span>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+
+        {repositoriesToDelete.size > 0 && (
+          <div className="flex-1 overflow-y-auto space-y-3 py-4">
+            {reposToDelete.map(repo => (
+              <div key={repo.id} className="flex items-start gap-3 p-3 border rounded-lg bg-muted/30">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="font-mono text-sm font-medium text-destructive">
+                      {repo.full_name}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeRepository(repo.id)}
+                      className="h-6 w-6 p-0 hover:bg-destructive/10"
+                      disabled={isBulkDeleting}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {repo.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {repo.description}
+                    </p>
+                  )}
+                  
+                  {requireRepoDeleteConfirmation && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        Type <span className="font-mono font-bold">{repo.name}</span> to confirm:
+                      </label>
+                      <Input
+                        type="text"
+                        value={confirmationInputs[repo.id] || ""}
+                        onChange={(e) => updateConfirmationInput(repo.id, e.target.value)}
+                        placeholder={repo.name}
+                        className="text-sm"
+                        disabled={isBulkDeleting}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <AlertDialogFooter className="flex-shrink-0">
           <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleBulkDelete}
-            disabled={isBulkDeleting}
+            disabled={!canDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isBulkDeleting ? "Deleting..." : "Delete All"}
+            {isBulkDeleting 
+              ? "Deleting..." 
+              : repositoriesToDelete.size === 1 
+                ? "Delete Repository" 
+                : `Delete ${repositoriesToDelete.size} Repositories`
+            }
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
