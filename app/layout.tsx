@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar/navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Git Manager - Repository Management Tool",
+  title: "GitRekt | Dangerously Simple Repository Management",
   description: "Manage and cleanup your local Git repositories with ease",
 };
 
