@@ -57,7 +57,6 @@ export async function getRepositoryInfo(repoPath: string): Promise<Repository> {
     const lastCommit = log.latest;
     const remoteUrl = remotes.find(r => r.name === 'origin')?.refs?.fetch || '';
     
-    // Get directory size
     const size = await getDirectorySize(repoPath);
     
     return {

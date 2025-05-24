@@ -100,7 +100,6 @@ export class GitHubAPIClient {
   async analyzeRepositoryHealth(repository: GitHubRepository): Promise<RepositoryHealth> {
     const issues: HealthIssue[] = [];
 
-    // Check for description
     if (!repository.description || repository.description.trim().length === 0) {
       issues.push({
         type: "no_description",
@@ -110,7 +109,6 @@ export class GitHubAPIClient {
 
     }
 
-    // Check for recent activity
     const daysSinceLastPush = repository.pushed_at 
       ? Math.floor((Date.now() - new Date(repository.pushed_at).getTime()) / (1000 * 60 * 60 * 24))
       : Infinity;
@@ -130,7 +128,6 @@ export class GitHubAPIClient {
       });
     }
 
-    // Check if repository is effectively empty (using simpler metrics)
     if (repository.size <= 1) {
       issues.push({
         type: "empty_repo",
@@ -139,7 +136,6 @@ export class GitHubAPIClient {
       });
     }
 
-    // Check repository size (in KB)
     if (repository.size > 100000) { // > 100MB
       issues.push({
         type: "large_size",
@@ -148,7 +144,6 @@ export class GitHubAPIClient {
       });
     }
 
-    // Calculate health score (0-100)
     let score = 100;
     issues.forEach(issue => {
       switch (issue.severity) {
@@ -166,7 +161,6 @@ export class GitHubAPIClient {
 
     score = Math.max(0, score);
 
-    // Determine status
     let status: HealthStatus;
     if (score >= 80) status = "excellent";
     else if (score >= 60) status = "good";
@@ -184,7 +178,6 @@ export class GitHubAPIClient {
   async getRepositoriesWithHealth(): Promise<GitHubRepositoryWithHealth[]> {
     const repositories = await this.getRepositories();
     
-    // Analyze health for repositories in batches to avoid rate limiting
     const repositoriesWithHealth: GitHubRepositoryWithHealth[] = [];
     
     for (let i = 0; i < repositories.length; i += 5) {
@@ -195,14 +188,13 @@ export class GitHubAPIClient {
           return { ...repo, health };
         } catch (error) {
           console.error(`Failed to analyze health for ${repo.name}:`, error);
-          return repo; // Return without health data if analysis fails
+          return repo; 
         }
       });
       
       const batchResults = await Promise.all(batchPromises);
       repositoriesWithHealth.push(...batchResults);
       
-      // Small delay to avoid hitting rate limits
       if (i + 5 < repositories.length) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }

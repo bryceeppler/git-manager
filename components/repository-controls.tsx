@@ -86,12 +86,10 @@ export function RepositoryControls({
       
       toast.info(`Starting health analysis for ${total} repositories...`);
 
-      // Process repositories one by one for real-time streaming updates
       for (let i = 0; i < repositoriesWithoutHealth.length; i++) {
         const repository = repositoriesWithoutHealth[i];
         
         try {
-          // Show analyzing state immediately
           const analyzingHealth: RepositoryHealth = {
             score: 0, 
             status: 'poor', 
@@ -99,7 +97,6 @@ export function RepositoryControls({
             lastAnalyzed: new Date().toISOString() 
           };
           
-          // Update UI immediately with analyzing state
           setRepositories(prev => 
             prev.map(repo => 
               repo.id === repository.id 
@@ -111,7 +108,6 @@ export function RepositoryControls({
           const { health, error } = await analyzeRepositoryHealth(repository);
           
           if (health) {
-            // Update with actual health data
             setRepositories(prev => 
               prev.map(repo => 
                 repo.id === repository.id 
@@ -121,7 +117,6 @@ export function RepositoryControls({
             );
           } else {
             console.error(`Failed to analyze health for ${repository.name}:`, error);
-            // Remove the analyzing state if failed
             setRepositories(prev => 
               prev.map(repo => 
                 repo.id === repository.id 
@@ -132,7 +127,6 @@ export function RepositoryControls({
           }
         } catch (error) {
           console.error(`Error analyzing ${repository.name}:`, error);
-          // Remove the analyzing state if failed
           setRepositories(prev => 
             prev.map(repo => 
               repo.id === repository.id 
@@ -142,10 +136,8 @@ export function RepositoryControls({
           );
         }
         
-        // Update progress
         setAnalysisProgress({ current: i + 1, total });
 
-        // Small delay between requests to prevent overwhelming the API
         if (i < repositoriesWithoutHealth.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 300));
         }
@@ -185,7 +177,6 @@ export function RepositoryControls({
   return (
     <Card>
       <CardContent className="space-y-3">
-        {/* Repository Stats */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-4 border-b">
           <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm text-muted-foreground">
             <div>
@@ -201,9 +192,7 @@ export function RepositoryControls({
           </div>
         </div>
 
-        {/* Search and Filter Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
-          {/* Search Section */}
           <div className="lg:col-span-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

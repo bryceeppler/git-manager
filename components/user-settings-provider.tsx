@@ -31,7 +31,6 @@ export function UserSettingsProvider({ children, initialSettings }: UserSettings
 export function useUserSettingsContext() {
   const context = useContext(UserSettingsContext);
   if (!context) {
-    // Return default values if no context (for unauthenticated users)
     return {
       settings: null,
       requireRepoDeleteConfirmation: true,

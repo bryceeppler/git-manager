@@ -9,7 +9,7 @@ import { BackToTopButton } from "./back-to-top-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Github, Activity, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Search, Activity, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 
 type SortOption = "updated" | "created" | "name" | "stars" | "forks" | "health";
 type SortDirection = "asc" | "desc";
@@ -18,7 +18,6 @@ interface RepositoryDashboardClientProps {
   initialRepositories: GitHubRepositoryWithHealth[];
 }
 
-// Analyzing Animation Component
 function AnalyzingAnimation() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -29,7 +28,6 @@ function AnalyzingAnimation() {
     const container = containerRef.current;
     const progress = progressRef.current;
 
-    // Subtle container glow pulse
     gsap.to(container, {
       boxShadow: "0 0 30px rgba(59, 130, 246, 0.3)",
       duration: 2,
@@ -38,7 +36,6 @@ function AnalyzingAnimation() {
       ease: "power2.inOut",
     });
 
-    // Smooth progress bar animation
     gsap.fromTo(progress, 
       { 
         backgroundPosition: "-100% center",
@@ -63,7 +60,6 @@ function AnalyzingAnimation() {
       ref={containerRef}
       className="absolute inset-0 rounded-lg pointer-events-none overflow-hidden"
     >
-      {/* Animated progress bar */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500/20 via-blue-400/40 to-blue-500/20">
         <div 
           ref={progressRef}
@@ -154,26 +150,15 @@ export function RepositoryDashboardClient({ initialRepositories }: RepositoryDas
     setRepositories(prev => prev.filter(repo => repo.id !== id));
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRepositories(new Set(sortedAndFilteredRepositories.map(repo => repo.id)));
-    } else {
-      setSelectedRepositories(new Set());
-    }
-  };
-
   const handleBulkDelete = (deletedIds: number[]) => {
     setRepositories(prev => prev.filter(repo => !deletedIds.includes(repo.id)));
     setSelectedRepositories(new Set());
   };
 
-  // Calculate health statistics
   const healthStats = useMemo(() => {
-    // Filter out repositories that are currently being analyzed
     const repositoriesWithHealth = repositories.filter(repo => {
       if (!repo.health) return false;
       
-      // Skip repositories that are currently being analyzed
       const isAnalyzing = repo.health.issues.some(issue => issue.description === 'Analyzing...');
       return !isAnalyzing;
     });
@@ -218,7 +203,6 @@ export function RepositoryDashboardClient({ initialRepositories }: RepositoryDas
     };
   }, [repositories]);
 
-  // Show health summary when health data becomes available
   useMemo(() => {
     if (healthStats && healthStats.totalAnalyzed > 0 && !showHealthSummary) {
       setShowHealthSummary(true);
@@ -301,7 +285,6 @@ export function RepositoryDashboardClient({ initialRepositories }: RepositoryDas
         sortDirection={sortDirection}
         setSortDirection={setSortDirection}
         sortedAndFilteredRepositories={sortedAndFilteredRepositories}
-        onSelectAll={handleSelectAll}
         onBulkDelete={handleBulkDelete}
         isAnalyzingHealth={isAnalyzingHealth}
         setIsAnalyzingHealth={setIsAnalyzingHealth}
@@ -324,7 +307,6 @@ export function RepositoryDashboardClient({ initialRepositories }: RepositoryDas
         <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
           <CardContent className="p-12">
             <div className="text-center space-y-4">
-              <Github className="h-12 w-12 mx-auto text-muted-foreground/50" />
               <h3 className="text-lg font-semibold">No repositories found</h3>
               <p className="text-muted-foreground">
                 It looks like you don&apos;t have any repositories yet. Create your first repository on GitHub to get started.

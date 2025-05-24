@@ -12,7 +12,6 @@ export function useUserSettings(options: UseUserSettingsOptions = {}) {
   const { data: session } = useSession();
   const [settings] = useState<UserSettings | null>(options.initialSettings || null);
 
-  // Only return settings if user is authenticated
   const validSettings = session?.userId ? settings : null;
 
   return {
