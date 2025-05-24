@@ -8,8 +8,7 @@ export function CTASection() {
           Ready to Take Control of Your Repositories?
         </h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Join developers who trust Git Manager to keep their GitHub repositories organized, 
-          secure, and optimized. Get started in seconds with your GitHub account.
+          Keep your GitHub repositories organized. Get started in seconds with your GitHub account.
         </p>
         <SignInButton 
           size="lg" 

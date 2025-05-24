@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GitRekt | Dangerously Simple Repository Management",
-  description: "Manage and cleanup your local Git repositories with ease",
+  description: "Manage your Git repositories without the handholding",
 };
 
 export default function RootLayout({

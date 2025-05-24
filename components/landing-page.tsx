@@ -17,7 +17,7 @@ export function LandingPage() {
     {
       icon: Trash2,
       title: "Just Delete Things",
-      description: "Click delete, it gets deleted. No 'Are you sure?' popups unless you want them.",
+      description: "Click delete, press confirm, it gets deleted. No extra-childproof popups unless you want them.",
       highlight: "Zero Friction"
     },
     {
@@ -29,7 +29,7 @@ export function LandingPage() {
     {
       icon: Settings,
       title: "Safety Mode (Optional)",
-      description: "Want those confirmation dialogs back? Flip a switch in settings.",
+      description: "Safe by default, but you can turn it off if you want to be a little more reckless.",
       highlight: "Your Call"
     },
     {
@@ -64,8 +64,7 @@ export function LandingPage() {
                 </span>
               </h2>
               <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Delete repos fast. No annoying confirmations. 
-                Turn safety mode back on if you&apos;re feeling nervous.
+                Delete repos fast. Safe by default, but you can turn it off if you want to be a little more reckless.
               </p>
             </div>
             
@@ -162,7 +161,7 @@ export function LandingPage() {
                 step: "03",
                 icon: Trash2,
                 title: "Delete Away",
-                description: "Click delete and it's gone. Enable confirmations in settings if you want them."
+                description: "Click delete, confirm, it's gone. Disable confirmations in settings if you want."
               }
             ].map((step, index) => {
               const Icon = step.icon;
