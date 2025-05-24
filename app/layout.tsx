@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/navbar/navbar";
@@ -22,6 +23,7 @@ export default function RootLayout({
             <main className="flex-1 bg-background">
               {children}
             </main>
+            <Analytics />
           </div>
         </Providers>
       </body>
